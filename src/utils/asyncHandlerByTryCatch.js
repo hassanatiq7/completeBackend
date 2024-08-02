@@ -1,6 +1,8 @@
+// High Order Function Syntax
+// variableDeclarationType functionName = (function as Parameter) = ( functionParametera that we take as parameter) =>{}
 
 
-export const asyncHandlerByTryCatch = (requestHandler) = async(req, res, next) => {
+const asyncHandlerByTryCatch = (requestHandler) = async(req, res, next) => {
     try {
         await requestHandler(req, res, next);
     } catch (error) {
@@ -11,5 +13,4 @@ export const asyncHandlerByTryCatch = (requestHandler) = async(req, res, next) =
     }
 }
 
-// High Order Function Syntax
-// variableDeclarationType functionName = (function as Parameter) = ( functionParametera that we take as parameter) =>{}
+export default asyncHandlerByTryCatch;
