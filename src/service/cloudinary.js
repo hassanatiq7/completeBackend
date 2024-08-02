@@ -17,8 +17,8 @@ try {
             resource_type: resourceType,    
         });
 
-        console.log(`File Uploaded Sucessfully: ${cloudinaryResponse.url}`);
-        return cloudinaryResponse.url;
+        console.log(`File Uploaded Sucessfully: ${cloudinaryResponse}`);
+        return cloudinaryResponse;
         
 } catch (error) {
 

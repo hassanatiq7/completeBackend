@@ -11,3 +11,5 @@ class apiResponse{
         this.success = true;
     }
 }
+
+export { apiResponse }
