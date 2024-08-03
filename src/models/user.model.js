@@ -32,11 +32,9 @@ const userSchema = new Schema({
     },
     avatar: {
         type: String,
-        default: ""
     },
     coverImage: {
         type: String,
-        default: ""
     },  
     watchHistory: [{
         type: Schema.Types.ObjectId,

@@ -2,6 +2,7 @@ import asyncHandlerByPromises from "../utils/asyncHandlerByPromises.js";
 import User from "../models/user.model.js";
 import { apiErrors } from "../utils/apiErrors.js";
 import { fileUploaderOnCLoud } from "../service/cloudinary.js";
+import { apiResponse } from "../utils/apiResponse.js";
 
 export const registerUser = asyncHandlerByPromises(async (req, res) => {
     //Take user data
@@ -21,37 +22,57 @@ export const registerUser = asyncHandlerByPromises(async (req, res) => {
             (fields) => fields?.trim() === "",
         )
     ) {
-        console.log(`${fullName}, ${userName}, ${email}, ${password}`);
         throw new apiErrors(400, "All fields must be filled in");
     }
 
+    console.log(`${fullName}, ${userName}, ${email}, ${password}`); 
+
     const userExists = await User.findOne({
-        $or: [{ userName }, { email }],
+        $or: [{ userName }, { email }]
     });
 
     if( userExists ) {
         throw new apiErrors(409, "User already exists");
     }
 
-    const avatarLocalPath = req.files?.avatar[0].path
-    const coverImageLocalPath = req.files?.cover[0].path
-
-    console.log(`Avatar: ${avatarLocalPath}`);
-    console.log(`Cover: ${coverImageLocalPath}`);
+    console.log(req.files);
     
-    if( !avatarLocalPath ){
-        throw new apiErrors(400, "Avatar file is required");
+    // (ONLY IF WHEN COVER IMAGE AND AVATAR IS REQUIRED)
+    // const avatarLocalPath = req.files?.avatar[0].path
+    // const coverImageLocalPath = req.files?.coverImage[0].path 
+
+    let avatarLocalPath;
+    let coverImageLocalPath;
+
+    if(req.files && Array.isArray(req.files.avatar) && req.files.avatar.length > 0) {
+        avatarLocalPath = req.files.avatar[0].path;
     }
 
-    const avatar = await fileUploaderOnCLoud(avatarLocalPath, "image"); 
-    const coverImage = await fileUploaderOnCLoud(coverImageLocalPath, "image");
-
-    if( !avatar ){
-        throw new apiErrors(400, "Avatar file is required");
+    if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+        coverImageLocalPath = req.files.coverImage[0].path;
     }
 
-    console.log(`avatar: ${avatar}`);
-    console.log(`cover: ${coverImage}`);
+    // console.log(`Avatar: ${avatarLocalPath}`);
+    // console.log(`Cover: ${coverImageLocalPath}`);
+    
+    // if( !avatarLocalPath ){
+    //     throw new apiErrors(400, "Avatar is required");
+    // }
+
+    // if( !coverImageLocalPath ){
+    //     throw new apiErrors(400, "Cover Image is required");
+    // }
+
+    const avatar = await fileUploaderOnCLoud(avatarLocalPath); 
+    const coverImage = await fileUploaderOnCLoud(coverImageLocalPath); 
+
+    // if( !avatar ){
+    //     throw new apiErrors(400, "Avatar file is required");
+    // }
+
+    // if( !coverImage ){
+    //     throw new apiErrors(400, "Cover Image is required");
+    // }
 
     const newUser = await User.create(
         {
@@ -59,7 +80,7 @@ export const registerUser = asyncHandlerByPromises(async (req, res) => {
             userName: userName.toLowerCase(),
             email,
             password,
-            avatar: avatar.url,
+            avatar: avatar?.url || "",
             coverImage: coverImage?.url || "",
         }
     )
@@ -72,6 +93,6 @@ export const registerUser = asyncHandlerByPromises(async (req, res) => {
 
 
     res.status(201).json(
-        apiResponse(201, "User registered successfully")
+       new apiResponse(201, newUserCreated,"User registered successfully")
     );
 });

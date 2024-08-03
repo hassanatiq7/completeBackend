@@ -9,22 +9,24 @@ cloudinary.config({
     api_secret: CLOUDINARY_API_SECRET
 });
 
-const fileUploaderOnCLoud = async (localFilepath, resourceType) =>{
+const fileUploaderOnCLoud = async (localFilepath) =>{
 try {
         if(!localFilepath) return null;
     
         const cloudinaryResponse = await cloudinary.uploader.upload(localFilepath, {
-            resource_type: resourceType,    
+            resource_type: 'auto',    
         });
 
         console.log(`File Uploaded Sucessfully: ${cloudinaryResponse}`);
+
+        fs.unlinkSync(localFilepath); // REMOVES THE FILE FROM TEMPORARY FOLDER IF THE FILE IS UPLOADED ON CLOUD.
         return cloudinaryResponse;
         
-} catch (error) {
+    } catch (error) {
 
     fs.unlink(localFilepath); // REMOVES THE FILE FROM TEMPORARY FOLDER IF THE FILE IS NOT UPLOADED ON CLOUD.
     return null;
-}
+    }
 }
 
 export { fileUploaderOnCLoud };
