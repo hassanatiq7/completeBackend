@@ -17,14 +17,16 @@ try {
             resource_type: 'auto',    
         });
 
-        console.log(`File Uploaded Sucessfully: ${cloudinaryResponse}`);
-
-        fs.unlinkSync(localFilepath); // REMOVES THE FILE FROM TEMPORARY FOLDER IF THE FILE IS UPLOADED ON CLOUD.
-        return cloudinaryResponse;
+        // console.log(`File Uploaded Sucessfully: ${cloudinaryResponse.url}`);
+        // REMOVES THE FILE FROM TEMPORARY FOLDER IF THE FILE IS UPLOADED ON CLOUD.
+        fs.unlink(localFilepath, (e) =>{
+            if(e) console.error(`Error deleting file: ${e.message}`);
+        })
         
+        return cloudinaryResponse;
     } catch (error) {
 
-    fs.unlink(localFilepath); // REMOVES THE FILE FROM TEMPORARY FOLDER IF THE FILE IS NOT UPLOADED ON CLOUD.
+    fs.unlinkSync(localFilepath); // REMOVES THE FILE FROM TEMPORARY FOLDER IF THE FILE IS NOT UPLOADED ON CLOUD.
     return null;
     }
 }

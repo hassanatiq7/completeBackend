@@ -79,12 +79,6 @@ userSchema.methods.isPasswordCorrect = async function(password){
     return await bcrypt.compare(password, this.password);
 }
 
-// userSchema.methods.isEmailCorrect = function(email){
-//     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-//     return emailRegex.test(this.email);
-// }
-
-
 const User = model('User', userSchema)
 
 export default User;
