@@ -1,9 +1,17 @@
+import jwt from "jsonwebtoken";
 import asyncHandlerByPromises from "../utils/asyncHandlerByPromises.js";
 import User from "../models/user.model.js";
 import { fileUploaderOnCLoud } from "../service/cloudinary.js";
 import { apiErrors } from "../utils/apiErrors.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import generateAuthTokens from "../middlewares/generateAuthToken.js";
+
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+const options = {
+    httpOnly: true,
+    secure: true,
+};
 
 export const registerUser = asyncHandlerByPromises(async (req, res) => {
     //Take user data
@@ -15,7 +23,7 @@ export const registerUser = asyncHandlerByPromises(async (req, res) => {
     //save user data in database
     //generate access token
     //send access token to user
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
 
 
     const { fullName, userName, email, password } = req.body;
@@ -97,10 +105,7 @@ export const registerUser = asyncHandlerByPromises(async (req, res) => {
 
     const { accessToken, refreshToken } = await generateAuthTokens(newUser._id)
 
-    const options = {
-        httpOnly: true,
-        secure: true,
-    };
+
     
     
 
@@ -128,7 +133,7 @@ export const loginUser = asyncHandlerByPromises(async (req, res) => {
     //generate refresh token
     //send access token and refresh token to user
 
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    // const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 
     const { userName, email, password } = req.body;
@@ -162,10 +167,10 @@ export const loginUser = asyncHandlerByPromises(async (req, res) => {
        }
 
        const { accessToken, refreshToken } = await generateAuthTokens(user._id)
-       const options = {
-        httpOnly: true,
-        secure: true,
-       };
+    //    const options = {
+    //     httpOnly: true,
+    //     secure: true,
+    //    };
        
        const userLoggedIn = await User.findById(user._id).select("-password -refreshtoken");
        res.status(200)
@@ -189,10 +194,10 @@ export const logout = asyncHandlerByPromises(async (req, res) => {
     {new: true}
 );
 
- const options = {
-    httpOnly: true,
-    secure: true,
- };
+//  const options = {
+//     httpOnly: true,
+//     secure: true,
+//  };
 
     res.status(200)
    .clearCookie("refreshToken", options)
@@ -201,4 +206,57 @@ export const logout = asyncHandlerByPromises(async (req, res) => {
        new apiResponse(200, {},"User logged out successfully")
     );
 
+});
+
+
+export const refreshAccessToken = asyncHandlerByPromises(async (req, res) => {
+    try {
+        const checkRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
+
+        if (!checkRefreshToken) {
+            throw new apiErrors(401, "Refresh token is required");
+        }
+
+        console.log("Received refresh token:", checkRefreshToken); // Log the received token
+
+        let decodedToken;
+        try {
+            decodedToken = jwt.verify(checkRefreshToken, process.env.REFRESH_TOKEN_SECRET);
+            console.log("Decoded token:", decodedToken); // Log the decoded token
+        } catch (err) {
+            console.error("Token verification error:", err); // Log the error
+            throw new apiErrors(403, "Invalid token format or verification failed");
+        }
+
+        if (!decodedToken) {
+            throw new apiErrors(403, "Access denied");
+        }
+
+        const user = await User.findOne({ _id: decodedToken.id });
+        console.log(`${user}`)
+
+        if (!user) {
+            throw new apiErrors(404, "User not found");
+        }
+
+        console.log(`${user.refreshtoken} \n${checkRefreshToken}`)
+
+        if (user.refreshtoken !== checkRefreshToken) {
+            throw new apiErrors(401, "Refresh token is invalid");
+        }
+
+        const { accessToken, refreshToken } = await generateAuthTokens(user._id);
+        console.log(`New refresh token: ${refreshToken} \nAccess Token: ${accessToken}`); // Log the new refresh token
+
+        res.status(200)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", refreshToken, options)
+            .json(
+                new apiResponse(200, { accessToken, refreshToken }, "User access token refreshed successfully")
+            );
+
+    } catch (error) {
+        console.error("Error in refreshing access token:", error); // Log the error
+        throw new apiErrors(401, error?.message || "Error while getting user access token");
+    }
 });
