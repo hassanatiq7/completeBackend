@@ -217,36 +217,36 @@ export const refreshAccessToken = asyncHandlerByPromises(async (req, res) => {
             throw new apiErrors(401, "Refresh token is required");
         }
 
-        console.log("Received refresh token:", checkRefreshToken); // Log the received token
+        // console.log("Received refresh token:", checkRefreshToken); // Log the received token
 
-        let decodedToken;
-        try {
+        // let decodedToken;
+        // try {
             decodedToken = jwt.verify(checkRefreshToken, process.env.REFRESH_TOKEN_SECRET);
-            console.log("Decoded token:", decodedToken); // Log the decoded token
-        } catch (err) {
-            console.error("Token verification error:", err); // Log the error
-            throw new apiErrors(403, "Invalid token format or verification failed");
-        }
+            // console.log("Decoded token:", decodedToken); // Log the decoded token
+        // } catch (err) {
+        //     console.error("Token verification error:", err); // Log the error
+        //     throw new apiErrors(403, "Invalid token format or verification failed");
+        // }
 
         if (!decodedToken) {
             throw new apiErrors(403, "Access denied");
         }
 
         const user = await User.findOne({ _id: decodedToken.id });
-        console.log(`${user}`)
+        // console.log(`${user}`)
 
         if (!user) {
             throw new apiErrors(404, "User not found");
         }
 
-        console.log(`${user.refreshtoken} \n${checkRefreshToken}`)
+        // console.log(`${user.refreshtoken} \n${checkRefreshToken}`)
 
         if (user.refreshtoken !== checkRefreshToken) {
             throw new apiErrors(401, "Refresh token is invalid");
         }
 
         const { accessToken, refreshToken } = await generateAuthTokens(user._id);
-        console.log(`New refresh token: ${refreshToken} \nAccess Token: ${accessToken}`); // Log the new refresh token
+        // console.log(`New refresh token: ${refreshToken} \nAccess Token: ${accessToken}`); // Log the new refresh token
 
         res.status(200)
             .cookie("accessToken", accessToken, options)
@@ -256,7 +256,7 @@ export const refreshAccessToken = asyncHandlerByPromises(async (req, res) => {
             );
 
     } catch (error) {
-        console.error("Error in refreshing access token:", error); // Log the error
+        // console.error("Error in refreshing access token:", error); // Log the error
         throw new apiErrors(401, error?.message || "Error while getting user access token");
     }
 });
