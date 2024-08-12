@@ -25,10 +25,12 @@ app.use(express.static("public"))
 
 //IMPORT ROUTES
 import authRoutes from "./routes/auth.routes.js"
+import usersRoutes from "./routes/user.routes.js"
 
 
 //ROUTES DECLARATION
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/user", usersRoutes);
 
 
 

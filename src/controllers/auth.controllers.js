@@ -77,8 +77,8 @@ export const registerUser = asyncHandlerByPromises(async (req, res) => {
     //     throw new apiErrors(400, "Cover Image is required");
     // }
 
-    const avatar = await fileUploaderOnCLoud(avatarLocalPath); 
-    const coverImage = await fileUploaderOnCLoud(coverImageLocalPath); 
+    const avatar = await fileUploaderOnCLoud(avatarLocalPath, User_avatars); 
+    const coverImage = await fileUploaderOnCLoud(coverImageLocalPath, User_covers); 
 
 
     // console.log(`Avatar: ${avatar}`);
@@ -98,8 +98,8 @@ export const registerUser = asyncHandlerByPromises(async (req, res) => {
             userName: userName.toLowerCase(),
             email,
             password,
-            avatar: avatar?.url || "",
-            coverImage: coverImage?.url ||"",
+            avatar: avatar?.secure_url || "",
+            coverImage: coverImage?.secure_url ||"",
         }
     );
 
@@ -221,7 +221,7 @@ export const refreshAccessToken = asyncHandlerByPromises(async (req, res) => {
 
         // let decodedToken;
         // try {
-            decodedToken = jwt.verify(checkRefreshToken, process.env.REFRESH_TOKEN_SECRET);
+        const decodedToken = jwt.verify(checkRefreshToken, process.env.REFRESH_TOKEN_SECRET);
             // console.log("Decoded token:", decodedToken); // Log the decoded token
         // } catch (err) {
         //     console.error("Token verification error:", err); // Log the error
