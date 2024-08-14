@@ -113,3 +113,37 @@ export const updateAvatar = asyncHandlerByPromises( async ( req, res ) => {
 
 });
 
+export const updateCoverImage = asyncHandlerByPromises( async ( req, res ) => {
+    const userId = req.user?._id;
+    const user = await User.findById(userId);
+
+    if(user.coverImage){
+        const image = user.coverImage.split('/').pop().split('.')[0];
+        await cloudinary.uploader.destroy(image);
+    }
+    
+    const coverImageLocalPath = req.file?.path;
+    
+    if(!coverImageLocalPath) {
+        throw new apiErrors(400, "Cover Image is required");
+    }
+
+    const coverImage = await fileUploaderOnCLoud(avatarLocalPath);
+
+    if(!coverImage) {
+        throw new apiErrors(400, "Error uploading Cover Image to cloudinary");
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId,
+        {
+            $set:{
+                coverImage: coverImage.url,
+            }
+        },{
+            new: true
+        }).select("-password -refreshtoken");
+
+        return res.status(200)
+        .json(new apiResponse(200, "Cover Image updated successfully", updatedUser));
+
+});
