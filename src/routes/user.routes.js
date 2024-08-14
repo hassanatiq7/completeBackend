@@ -4,7 +4,7 @@ import upload from "../middlewares/multer.middleware.js";
 import { changePassword,
     getCurrentUser,
     updateFullName,
-    updateAvater } from "../controllers/user.controllers.js";
+    updateAvatar } from "../controllers/user.controllers.js";
 
 const router = express.Router();
 
@@ -14,8 +14,8 @@ router.get("/getuser", verifYJWT, getCurrentUser);
 
 router.patch("/changename", verifYJWT, updateFullName);
 
-router.patch("/updateavater", verifYJWT,
+router.patch("/updateavatar", verifYJWT,
     upload.single("avatar"), 
-    updateAvater);
+    updateAvatar);
 
 export default router;

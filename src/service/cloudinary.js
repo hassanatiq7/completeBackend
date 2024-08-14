@@ -15,9 +15,17 @@ try {
     
         const cloudinaryResponse = await cloudinary.uploader.upload(localFilepath, {
             resource_type: 'auto',
-            folder:`${imageFolder}`,
-            use_filename: true,    
-        });
+            // folder:`${imageFolder}`,
+            // use_filename: true,    
+        }
+        // ,function (error, result) {
+        //     if (result.url) {
+        //         resolve({ url: result.url })
+        //     } else {
+        //         reject({ message: "image upload fail", error })
+        //     }
+        // },
+        );
 
         // console.log(`File Uploaded Sucessfully: ${cloudinaryResponse.url}`);
         // REMOVES THE FILE FROM TEMPORARY FOLDER IF THE FILE IS UPLOADED ON CLOUD.

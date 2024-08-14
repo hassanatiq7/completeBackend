@@ -77,8 +77,8 @@ export const registerUser = asyncHandlerByPromises(async (req, res) => {
     //     throw new apiErrors(400, "Cover Image is required");
     // }
 
-    const avatar = await fileUploaderOnCLoud(avatarLocalPath, User_avatars); 
-    const coverImage = await fileUploaderOnCLoud(coverImageLocalPath, User_covers); 
+    const avatar = await fileUploaderOnCLoud(avatarLocalPath); 
+    const coverImage = await fileUploaderOnCLoud(coverImageLocalPath); 
 
 
     // console.log(`Avatar: ${avatar}`);
@@ -98,8 +98,8 @@ export const registerUser = asyncHandlerByPromises(async (req, res) => {
             userName: userName.toLowerCase(),
             email,
             password,
-            avatar: avatar?.secure_url || "",
-            coverImage: coverImage?.secure_url ||"",
+            avatar: avatar?.url || "",
+            coverImage: coverImage?.url ||"",
         }
     );
 

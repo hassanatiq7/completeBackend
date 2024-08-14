@@ -2,6 +2,8 @@ import asyncHandlerByPromises from "../utils/asyncHandlerByPromises.js";
 import User from "../models/user.model.js";
 import { apiErrors } from "../utils/apiErrors.js";
 import { apiResponse } from "../utils/apiResponse.js";
+import { v2 as cloudinary } from "cloudinary";
+import { fileUploaderOnCLoud } from "../service/cloudinary.js";
 
 export const changePassword = asyncHandlerByPromises(async (req, res) => {
     //Update user password in the database
@@ -76,8 +78,14 @@ export const updateFullName = asyncHandlerByPromises(async ( req, res) => {
 });
 
 
-export const updateAvater = asyncHandlerByPromises( async ( req, res ) => {
+export const updateAvatar = asyncHandlerByPromises( async ( req, res ) => {
     const userId = req.user?._id;
+    const user = await User.findById(userId);
+
+    if(user.avatar){
+        const image = user.avatar.split('/').pop().split('.')[0];
+        await cloudinary.uploader.destroy(image);
+    }
     
     const avatarLocalPath = req.file?.path;
     
@@ -85,7 +93,7 @@ export const updateAvater = asyncHandlerByPromises( async ( req, res ) => {
         throw new apiErrors(400, "Avatar is required");
     }
 
-    const avatar = await fileUploaderOnCLoud(avatarLocalPath, User_avatars);
+    const avatar = await fileUploaderOnCLoud(avatarLocalPath);
 
     if(!avatar) {
         throw new apiErrors(400, "Error uploading avatar to cloudinary");
@@ -94,7 +102,7 @@ export const updateAvater = asyncHandlerByPromises( async ( req, res ) => {
     const updatedUser = await User.findByIdAndUpdate(userId,
         {
             $set:{
-                avatar: avatar.secure_url,
+                avatar: avatar.url,
             }
         },{
             new: true
